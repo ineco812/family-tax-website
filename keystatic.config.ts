@@ -8,7 +8,7 @@ export default config({
     ? { kind: 'local' } 
     : {
         kind: 'github',
-        repo: 'OWNER/REPO_NAME', // 배포 시 실제 GitHub 저장소 이름으로 변경해야 합니다. (예: 'my-org/my-repo')
+        repo: 'ineco812/family-tax-website', // 실제 깃허브 저장소 연결 완료
       },
   collections: {
     posts: collection({
