@@ -9,7 +9,7 @@ import robotsTxt from 'astro-robots-txt';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://preeminent-pastelito-8d7f42.netlify.app',
+  site: 'https://family-lawcare.kr',
   output: 'server',
 
   vite: {
