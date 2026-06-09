@@ -1,0 +1,82 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// 이미 로그인되어 있다면 admin 페이지로 리다이렉트
+if (Astro.cookies.has('admin_session')) {
+  return Astro.redirect('/admin');
+}
+---
+
+<Layout title="관리자 로그인 - 가족상속세무연구소">
+  <div class="min-h-[80vh] flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-slate-100">
+      <div>
+        <h2 class="mt-2 text-center text-3xl font-extrabold text-slate-900 tracking-tight">
+          관리자 로그인
+        </h2>
+        <p class="mt-3 text-center text-sm text-slate-500">
+          허가된 관리자만 접근할 수 있습니다.
+        </p>
+      </div>
+      <form class="mt-8 space-y-6" id="loginForm">
+        <div class="rounded-md shadow-sm -space-y-px">
+          <div>
+            <label for="email" class="sr-only">이메일 주소</label>
+            <input id="email" name="email" type="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="이메일 주소">
+          </div>
+          <div>
+            <label for="password" class="sr-only">비밀번호</label>
+            <input id="password" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="비밀번호">
+          </div>
+        </div>
+
+        <div id="error-message" class="text-red-500 text-sm font-medium text-center hidden"></div>
+
+        <div>
+          <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-colors shadow-sm">
+            로그인
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const form = document.getElementById('loginForm');
+  const errorMessage = document.getElementById('error-message');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (errorMessage) errorMessage.classList.add('hidden');
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get('email');
+    const password = formData.get('password');
+
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        window.location.href = '/admin';
+      } else {
+        const data = await response.json();
+        if (errorMessage) {
+          errorMessage.textContent = data.message || '로그인에 실패했습니다.';
+          errorMessage.classList.remove('hidden');
+        }
+      }
+    } catch (error) {
+      if (errorMessage) {
+        errorMessage.textContent = '서버 오류가 발생했습니다.';
+        errorMessage.classList.remove('hidden');
+      }
+    }
+  });
+</script>

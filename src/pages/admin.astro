@@ -1,0 +1,133 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// 쿠키가 없으면 로그인 페이지로 리다이렉트
+if (!Astro.cookies.has('admin_session')) {
+  return Astro.redirect('/login');
+}
+---
+
+<Layout title="관리자 대시보드 - 가족상속세무연구소">
+  <div class="min-h-screen bg-slate-50">
+    <nav class="bg-slate-900 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <span class="text-white text-xl font-bold tracking-wider">CMS 관리자</span>
+          </div>
+          <div class="flex items-center">
+            <form action="/api/logout" method="POST">
+              <button type="submit" class="text-sm font-medium text-slate-300 hover:text-white transition-colors bg-slate-800 px-4 py-2 rounded-md">
+                로그아웃
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-8">
+          <h1 class="text-2xl font-bold text-slate-900 mb-8 border-b pb-4">새 칼럼 작성</h1>
+          
+          <form id="postForm" class="space-y-6">
+            <div>
+              <label for="title" class="block text-sm font-medium text-slate-700">제목</label>
+              <input type="text" id="title" name="title" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-3 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900 text-lg">
+            </div>
+
+            <div>
+              <label for="slug" class="block text-sm font-medium text-slate-700">URL 슬러그 (영어 소문자와 하이픈만 입력 권장, 예: my-new-post)</label>
+              <input type="text" id="slug" name="slug" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900">
+            </div>
+
+            <div>
+              <label for="summary" class="block text-sm font-medium text-slate-700">요약 (목록에 표시될 짧은 설명)</label>
+              <textarea id="summary" name="summary" rows="3" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900"></textarea>
+            </div>
+
+            <div>
+              <label for="tags" class="block text-sm font-medium text-slate-700">태그 (쉼표로 구분, 예: 상속세,증여세)</label>
+              <input type="text" id="tags" name="tags" class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900">
+            </div>
+
+            <div>
+              <label for="content" class="block text-sm font-medium text-slate-700">본문 내용 (Markdown 문법 지원)</label>
+              <textarea id="content" name="content" rows="15" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-3 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900 font-mono text-sm leading-relaxed" placeholder="# 큰 제목\n\n여기에 마크다운 형식으로 내용을 작성하세요."></textarea>
+            </div>
+
+            <div id="status-message" class="hidden rounded-md p-4 text-sm font-medium"></div>
+
+            <div class="pt-4 flex justify-end">
+              <button type="submit" id="submitBtn" class="bg-blue-600 border border-transparent rounded-md shadow-sm py-3 px-8 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                발행하기 (GitHub 커밋)
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<script>
+  const form = document.getElementById('postForm');
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+  const statusMessage = document.getElementById('status-message');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '처리 중...';
+    }
+    
+    if (statusMessage) {
+      statusMessage.className = 'hidden';
+    }
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
+    
+    // 태그를 배열로 변환
+    if (data.tags) {
+      data.tags = (data.tags as string).split(',').map(t => t.trim()).filter(Boolean);
+    } else {
+      data.tags = [];
+    }
+
+    try {
+      const response = await fetch('/api/publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        if (statusMessage) {
+          statusMessage.textContent = '성공적으로 깃허브에 커밋되었습니다! 1~2분 뒤 Netlify 배포가 완료되면 블로그에 반영됩니다.';
+          statusMessage.className = 'rounded-md p-4 text-sm font-medium bg-green-50 text-green-800 border border-green-200 mt-4';
+        }
+        (e.target as HTMLFormElement).reset();
+      } else {
+        throw new Error(result.message || '업로드 중 오류가 발생했습니다.');
+      }
+    } catch (error: any) {
+      if (statusMessage) {
+        statusMessage.textContent = error.message;
+        statusMessage.className = 'rounded-md p-4 text-sm font-medium bg-red-50 text-red-800 border border-red-200 mt-4';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '발행하기 (GitHub 커밋)';
+      }
+    }
+  });
+</script>
