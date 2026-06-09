@@ -224,7 +224,7 @@ if (!post) {
     }
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries());
+    const data: Record<string, any> = Object.fromEntries(formData.entries());
     
     // 태그를 배열로 변환
     if (data.tags) {
