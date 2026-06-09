@@ -1,0 +1,6 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Powered-By = ""
+    Server = "secure-server"
+    X-Content-Type-Options = "nosniff"
