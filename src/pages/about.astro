@@ -3,25 +3,56 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="소개 - 가족상속세무연구소">
-  <div class="max-w-3xl mx-auto px-6 py-20">
-    <h1 class="text-3xl md:text-4xl font-bold mb-8 text-center text-deep-navy">가족상속세무연구소 소개</h1>
+  <div class="max-w-4xl mx-auto px-6 py-20 font-sans">
+    <div class="text-center mb-16">
+      <h1 class="text-3xl md:text-5xl font-bold mb-6 text-slate-900 tracking-tight">가족상속세무연구소<br><span class="text-xl md:text-2xl text-slate-500 font-normal mt-4 block">(Family Inheritance & Tax Law Care)</span></h1>
+      <p class="text-xl text-blue-600 font-semibold">가장 힘든 순간, 가장 명쾌한 법률·세무 가이드를 전합니다.</p>
+    </div>
     
     <div class="prose prose-slate prose-lg max-w-none">
-      <p>
-        안녕하십니까, <strong>가족상속세무연구소</strong>입니다.
-      </p>
-      <p>
-        저희 연구소는 복잡하고 난해한 세법 속에서 고객님의 소중한 자산을 지키고, 성공적인 세대 간 부의 이전을 돕기 위해 설립되었습니다. 상속 및 증여 분야에서 오랜 경험과 노하우를 축적한 세무 전문가들이 모여 최적의 절세 솔루션을 제공합니다.
-      </p>
-      <h3>우리의 핵심 가치</h3>
-      <ul>
-        <li><strong>전문성 (Expertise):</strong> 끊임없이 변화하는 세법과 판례를 연구하여 가장 정확하고 안전한 절세 방안을 제시합니다.</li>
-        <li><strong>신뢰 (Trust):</strong> 고객의 비밀을 철저히 보장하며, 투명하고 정직한 업무 처리로 굳건한 신뢰 관계를 구축합니다.</li>
-        <li><strong>맞춤형 솔루션 (Customized Solution):</strong> 각 가정의 자산 구조와 상황이 다르듯, 획일화된 방법이 아닌 오직 한 분만을 위한 맞춤형 전략을 수립합니다.</li>
-      </ul>
-      <p>
-        미리 준비하는 자만이 미래의 불확실성을 통제할 수 있습니다. 가족상속세무연구소가 여러분의 든든한 파트너가 되어 드리겠습니다.
-      </p>
+      <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 mb-10">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4 border-b pb-2">인사말</h2>
+        <p class="leading-relaxed">
+          갑작스러운 이별 뒤에 남겨진 가족들이 마주하는 가장 큰 장벽은 복잡한 법률과 세무 행정 절차입니다. 슬픔을 추스를 겨를도 없이 쏟아지는 상속세, 취득세, 재산 분할 등의 현실적인 고충은 유족들을 더욱 힘들게 만들곤 합니다.
+        </p>
+        <p class="leading-relaxed">
+          가족상속세무연구소는 이러한 유족들의 짐을 조금이나마 덜어드리고자 뜻을 모은 법률 및 세무 전문가들의 자발적 정보 공유 채널입니다. 우리는 복잡하고 딱딱한 법적 용어를 누구나 이해하기 쉬운 언어로 풀어내어, 부모님이 남겨주신 소중한 자산과 가족의 화목을 안전하게 지킬 수 있도록 돕습니다.
+        </p>
+      </div>
+
+      <div class="mb-10">
+        <h2 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-2">주요 전문 정보 영역</h2>
+        <ul class="space-y-4">
+          <li class="flex items-start">
+            <span class="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-blue-500 mr-3"></span>
+            <div>
+              <strong class="text-slate-900 block mb-1">상속세 및 정밀 절세 가이드</strong>
+              <span class="text-slate-600">상속세 면제 한도 분석 및 합법적인 사전·사후 절세 전략 제시</span>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <span class="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-blue-500 mr-3"></span>
+            <div>
+              <strong class="text-slate-900 block mb-1">사망 후 필수 행정 절차 안내</strong>
+              <span class="text-slate-600">안심상속 원스톱 서비스, 사망신고 등 기한 내 필수 업무 체크리스트 제공</span>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <span class="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-blue-500 mr-3"></span>
+            <div>
+              <strong class="text-slate-900 block mb-1">가족법 및 재산 분할 법률 상식</strong>
+              <span class="text-slate-600">상속포기, 한정승인, 유류분 청구 등 유족 간 분쟁을 예방하는 법률 지식 공유</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 mt-12 text-sm text-slate-500">
+        <h3 class="font-bold text-slate-700 mb-2">유의사항 (Disclaimer)</h3>
+        <p class="leading-relaxed m-0">
+          본 연구소의 모든 칼럼과 가이드는 정보 제공 및 대중의 이해를 돕기 위해 작성된 참고 자료입니다. 실제 개별적인 세무·법률 집행 시에는 구체적인 자산 상황과 법적 관계에 따라 결과가 달라질 수 있으므로, 반드시 공인된 세무사 또는 변호사와의 개별 상담을 거치시거나 믿을 수 있는 전문 의전/행정 케어 기관의 도움을 받아 진행하시길 권장합니다.
+        </p>
+      </div>
     </div>
   </div>
 </Layout>
