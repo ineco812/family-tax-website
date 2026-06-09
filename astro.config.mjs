@@ -12,7 +12,7 @@ import netlify from '@astrojs/netlify';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://preeminent-pastelito-8d7f42.netlify.app',
-  output: 'static',
+  output: 'hybrid',
 
   vite: {
     plugins: [tailwindcss()]
