@@ -6,19 +6,44 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  image?: string;
 }
 
-const { title, description = "가족상속세무연구소 - 상속세 및 증여세 전문 절세 칼럼" } = Astro.props;
+const { 
+  title, 
+  description = "가족상속세무연구소 - 상속세 및 증여세 전문 절세 칼럼",
+  image = "/favicon.svg" // 기본 이미지 설정 시 public 폴더에 큰 로고 이미지를 두는 것이 좋습니다 (예: /og-image.jpg)
+} = Astro.props;
+
+// Canonical URL 생성
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://preeminent-pastelito-8d7f42.netlify.app');
 ---
 
 <!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- SEO & Canonical -->
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.url)} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={new URL(image, Astro.url)} />
   </head>
   <body class="flex flex-col min-h-screen bg-slate-50 text-slate-900">
     <Header />
