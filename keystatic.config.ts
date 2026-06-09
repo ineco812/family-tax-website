@@ -7,10 +7,11 @@ export default config({
   storage: isDev 
     ? { kind: 'local' } 
     : {
-        kind: 'github',
-        repo: 'ineco812/family-tax-website', // 실제 깃허브 저장소 연결 완료
+        kind: 'cloud',
       },
-  secret: 'daedeb4f1ffee3e447b3824e3dd874a41665f616a8022226b54eee01ebdd4fb1',
+  cloud: {
+    project: 'ineco812/family-tax-website', // 프로젝트 ID (계정명/저장소명)
+  },
   ui: {
     brand: { name: '가족상속세무연구소 CMS' },
     navigation: {
