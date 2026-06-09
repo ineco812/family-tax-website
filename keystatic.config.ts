@@ -10,6 +10,13 @@ export default config({
         kind: 'github',
         repo: 'ineco812/family-tax-website', // 실제 깃허브 저장소 연결 완료
       },
+  secret: 'daedeb4f1ffee3e447b3824e3dd874a41665f616a8022226b54eee01ebdd4fb1',
+  ui: {
+    brand: { name: '가족상속세무연구소 CMS' },
+    navigation: {
+      '콘텐츠 관리': ['posts'],
+    },
+  },
   collections: {
     posts: collection({
       label: '세무 칼럼',
