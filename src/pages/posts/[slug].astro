@@ -2,14 +2,29 @@
 import { getEntry, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
-const { slug } = Astro.params;
-if (!slug) return Astro.redirect('/404');
+let post;
+let Content;
+let errorMsg = '';
 
-const post = await getEntry('posts', slug);
-if (!post) return Astro.redirect('/404');
+try {
+  const { slug } = Astro.params;
+  if (!slug) return Astro.redirect('/404');
 
-const { Content } = await render(post);
+  post = await getEntry('posts', slug);
+  if (!post) return Astro.redirect('/404');
+
+  const rendered = await render(post);
+  Content = rendered.Content;
+} catch (e: any) {
+  errorMsg = e.message || String(e);
+}
 ---
+{errorMsg ? (
+  <div>
+    <h1>500 Internal Server Error</h1>
+    <pre>{errorMsg}</pre>
+  </div>
+) : (
 
 <Layout title={`${post.data.title} - 가족상속세무연구소`} description={post.data.summary}>
   <article class="max-w-3xl mx-auto px-6 py-20 bg-white shadow-sm my-10 rounded-sm border border-slate-100">
@@ -50,3 +65,4 @@ const { Content } = await render(post);
     </section>
   </article>
 </Layout>
+)}
