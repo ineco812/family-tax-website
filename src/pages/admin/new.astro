@@ -1,0 +1,255 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// 쿠키가 없으면 로그인 페이지로 리다이렉트
+if (!Astro.cookies.has('admin_session')) {
+  return Astro.redirect('/login');
+}
+---
+
+<Layout title="관리자 대시보드 - 가족상속세무연구소">
+  <div class="min-h-screen bg-slate-50">
+    <nav class="bg-slate-900 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <span class="text-white text-xl font-bold tracking-wider">CMS 관리자</span>
+          </div>
+          <div class="flex items-center">
+            <form action="/api/logout" method="POST">
+              <button type="submit" class="text-sm font-medium text-slate-300 hover:text-white transition-colors bg-slate-800 px-4 py-2 rounded-md">
+                로그아웃
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-8">
+          <h1 class="text-2xl font-bold text-slate-900 mb-8 border-b pb-4">새 칼럼 작성</h1>
+          
+          <form id="postForm" class="space-y-6">
+            <div>
+              <label for="title" class="block text-sm font-medium text-slate-700">제목</label>
+              <input type="text" id="title" name="title" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-3 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900 text-lg">
+            </div>
+
+            <div>
+              <label for="slug" class="block text-sm font-medium text-slate-700">URL 슬러그 (영어 소문자와 하이픈만 입력 권장, 예: my-new-post)</label>
+              <input type="text" id="slug" name="slug" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900">
+            </div>
+
+            <div>
+              <label for="summary" class="block text-sm font-medium text-slate-700">요약 (목록에 표시될 짧은 설명)</label>
+              <textarea id="summary" name="summary" rows="3" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900"></textarea>
+            </div>
+
+            <div>
+              <label for="tags" class="block text-sm font-medium text-slate-700">태그 (쉼표로 구분, 예: 상속세,증여세)</label>
+              <input type="text" id="tags" name="tags" class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900">
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label for="content" class="block text-sm font-medium text-slate-700">본문 내용 (Markdown 문법 지원)</label>
+                <div>
+                  <input type="file" id="imageInput" accept="image/*" class="hidden" />
+                  <button type="button" id="uploadImageBtn" class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    <svg class="-ml-0.5 mr-2 h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    이미지 첨부
+                  </button>
+                </div>
+              </div>
+              <textarea id="content" name="content" rows="15" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-3 px-4 focus:ring-blue-500 focus:border-blue-500 text-slate-900 font-mono text-sm leading-relaxed" placeholder="# 큰 제목\n\n여기에 마크다운 형식으로 내용을 작성하세요."></textarea>
+            </div>
+
+            <div id="status-message" class="hidden rounded-md p-4 text-sm font-medium"></div>
+
+            <div class="pt-4 flex justify-end">
+              <button type="submit" id="submitBtn" class="bg-blue-600 border border-transparent rounded-md shadow-sm py-3 px-8 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                발행하기 (GitHub 커밋)
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<script>
+  const form = document.getElementById('postForm');
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+  const statusMessage = document.getElementById('status-message');
+  const contentTextarea = document.getElementById('content') as HTMLTextAreaElement;
+  const imageInput = document.getElementById('imageInput') as HTMLInputElement;
+  const uploadImageBtn = document.getElementById('uploadImageBtn') as HTMLButtonElement;
+
+  // 이미지 첨부 버튼 클릭 시 숨겨진 파일 인풋 클릭
+  uploadImageBtn?.addEventListener('click', () => {
+    imageInput?.click();
+  });
+
+  // 이미지 최적화 함수 (리사이징 및 WebP 변환)
+  function optimizeImage(file: File, maxWidth: number, quality: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // 가로 길이가 최대 길이보다 크면 비율에 맞춰 축소
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // WebP 포맷으로 최적화하여 반환
+            resolve(canvas.toDataURL('image/webp', quality));
+          } else {
+            reject(new Error('Canvas context is null'));
+          }
+        };
+        img.onerror = reject;
+        img.src = e?.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // 파일 선택 시 업로드 처리
+  imageInput?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    // 1. SEO 대체 텍스트 입력받기
+    const defaultAlt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+    let altText = prompt('검색 엔진 최적화(SEO)를 위해 이미지의 설명을 짧게 입력해주세요.\n(예: 상속세 신고 기한 안내표)', defaultAlt);
+    
+    // 취소를 누르면 업로드 중단
+    if (altText === null) {
+      imageInput.value = '';
+      return; 
+    }
+    if (!altText.trim()) altText = '이미지';
+
+    // 업로드 중 상태 표시
+    const originalBtnText = uploadImageBtn.innerHTML;
+    uploadImageBtn.disabled = true;
+    uploadImageBtn.textContent = '최적화 및 업로드 중...';
+
+    try {
+      // 2. 브라우저에서 이미지 리사이징 및 WebP 변환 (가로 최대 1200px, 품질 80%)
+      const optimizedBase64 = await optimizeImage(file, 1200, 0.8);
+      
+      // "data:image/webp;base64," 뒷부분만 추출
+      const content = optimizedBase64.split(',')[1];
+      const newFilename = defaultAlt + '.webp';
+
+      // API 호출
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: newFilename,
+          content: content
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.url) {
+        // 커서 위치에 마크다운 이미지 태그 삽입 (SEO alt text 포함)
+        const cursorPosition = contentTextarea.selectionStart;
+        const textBefore = contentTextarea.value.substring(0, cursorPosition);
+        const textAfter = contentTextarea.value.substring(cursorPosition);
+        const imageMarkdown = `\n![${altText}](${result.url})\n`;
+        
+        contentTextarea.value = textBefore + imageMarkdown + textAfter;
+        
+        // 커서 위치 이동
+        contentTextarea.selectionStart = cursorPosition + imageMarkdown.length;
+        contentTextarea.selectionEnd = cursorPosition + imageMarkdown.length;
+        contentTextarea.focus();
+      } else {
+        alert(result.message || '이미지 업로드에 실패했습니다.');
+      }
+    } catch (error) {
+      alert('이미지 최적화 및 업로드 중 오류가 발생했습니다.');
+    } finally {
+      // 입력창 초기화 및 버튼 복구
+      imageInput.value = '';
+      uploadImageBtn.disabled = false;
+      uploadImageBtn.innerHTML = originalBtnText;
+    }
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '처리 중...';
+    }
+    
+    if (statusMessage) {
+      statusMessage.className = 'hidden';
+    }
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
+    
+    // 태그를 배열로 변환
+    if (data.tags) {
+      data.tags = (data.tags as string).split(',').map(t => t.trim()).filter(Boolean);
+    } else {
+      data.tags = [];
+    }
+
+    try {
+      const response = await fetch('/api/publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        if (statusMessage) {
+          statusMessage.textContent = '성공적으로 깃허브에 커밋되었습니다! 1~2분 뒤 Netlify 배포가 완료되면 블로그에 반영됩니다.';
+          statusMessage.className = 'rounded-md p-4 text-sm font-medium bg-green-50 text-green-800 border border-green-200 mt-4';
+        }
+        (e.target as HTMLFormElement).reset();
+      } else {
+        throw new Error(result.message || '업로드 중 오류가 발생했습니다.');
+      }
+    } catch (error: any) {
+      if (statusMessage) {
+        statusMessage.textContent = error.message;
+        statusMessage.className = 'rounded-md p-4 text-sm font-medium bg-red-50 text-red-800 border border-red-200 mt-4';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '발행하기 (GitHub 커밋)';
+      }
+    }
+  });
+</script>

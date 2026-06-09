@@ -1,0 +1,118 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// 쿠키가 없으면 로그인 페이지로 리다이렉트
+if (!Astro.cookies.has('admin_session')) {
+  return Astro.redirect('/login');
+}
+
+const posts = await getCollection('posts');
+posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Layout title="관리자 대시보드 - 가족상속세무연구소">
+  <div class="min-h-screen bg-slate-50">
+    <nav class="bg-slate-900 border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <span class="text-white text-xl font-bold tracking-wider">CMS 관리자</span>
+            <a href="/" class="text-slate-300 hover:text-white text-sm">홈페이지 보기</a>
+          </div>
+          <div class="flex items-center">
+            <form action="/api/logout" method="POST">
+              <button type="submit" class="text-sm font-medium text-slate-300 hover:text-white transition-colors bg-slate-800 px-4 py-2 rounded-md">
+                로그아웃
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold text-slate-900">전체 칼럼 목록</h1>
+        <a href="/admin/new" class="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+          새 글 작성
+        </a>
+      </div>
+
+      <div class="bg-white shadow overflow-hidden sm:rounded-md border border-slate-200">
+        <ul role="list" class="divide-y divide-slate-200">
+          {posts.length === 0 ? (
+            <li class="px-6 py-10 text-center text-slate-500">
+              아직 작성된 글이 없습니다. 새 글을 작성해보세요.
+            </li>
+          ) : posts.map((post) => (
+            <li>
+              <div class="px-4 py-4 sm:px-6 hover:bg-slate-50 transition-colors">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1 min-w-0 pr-4">
+                    <a href={`/posts/${post.id}`} target="_blank" class="block focus:outline-none">
+                      <p class="text-lg font-bold text-slate-800 truncate hover:text-blue-600 transition-colors">
+                        {post.data.title}
+                      </p>
+                      <p class="text-sm text-slate-500 mt-1 line-clamp-1">
+                        {post.data.summary}
+                      </p>
+                    </a>
+                  </div>
+                  <div class="flex-shrink-0 flex space-x-3 items-center">
+                    <p class="text-xs text-slate-500 mr-4">
+                      {post.data.date.toLocaleDateString('ko-KR')}
+                    </p>
+                    <a href={`/admin/edit/${post.id}`} class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                      수정
+                    </a>
+                    <button type="button" onclick={`deletePost('${post.id}')`} class="inline-flex items-center px-3 py-1.5 border border-red-200 shadow-sm text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<script is:inline>
+  async function deletePost(slug) {
+    if (!confirm('정말 이 글을 삭제하시겠습니까? (삭제 후 복구할 수 없습니다)')) {
+      return;
+    }
+
+    // 로딩 표시 추가 가능 (여기서는 간단히 alert으로 대체)
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = '삭제 중...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('글이 성공적으로 삭제되었습니다. 반영까지 1~2분 소요될 수 있습니다.');
+        window.location.reload();
+      } else {
+        alert(result.message || '삭제 중 오류가 발생했습니다.');
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    } catch (error) {
+      alert('서버 오류가 발생했습니다.');
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  }
+</script>
