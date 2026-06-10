@@ -6,6 +6,7 @@ import react from '@astrojs/react';
 import netlify from '@astrojs/netlify';
 import sitemap from '@astrojs/sitemap';
 import robotsTxt from 'astro-robots-txt';
+import remarkHtmlBlocks from './src/lib/remark-html-blocks.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,6 +15,10 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()]
+  },
+
+  markdown: {
+    remarkPlugins: [remarkHtmlBlocks]
   },
 
   integrations: [
